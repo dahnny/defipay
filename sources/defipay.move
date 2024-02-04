@@ -92,18 +92,15 @@ module defipay::defipay{
         //check that the person using this function is actually the customer
         assert!(customer.customer_address == tx_context::sender(ctx), ENotOwner);
 
-        // let amount_balance = coin::into_balance(amount);
         let amount_balance_mut = coin::balance_mut(amount);
         let remaining_temp = balance::split(amount_balance_mut, FLOAT_SCALING);
-        let remaining_temp_2 = balance::split(amount_balance_mut, FLOAT_SCALING);
         let remaining = balance::split(amount_balance_mut, FLOAT_SCALING);
         let _amount = coin::from_balance(remaining, ctx);
 
         public_transfer(_amount, admin.owner_address);
 
         balance::join(&mut customer.balance, remaining_temp);
-        balance::join(&mut admin.balance, remaining_temp_2);
-
+        balance::join(&mut admin.balance, remaining_temp);
     }
 
     // withdraw function
@@ -114,14 +111,13 @@ module defipay::defipay{
         ctx: &mut TxContext
     ){
         //check if customer balance is greater or equal to amount being withdrawn
-        assert!(balance::value(&amount)>balance::value(&customer.balance),EInsufficientBalance);
+        assert!(balance::value(&amount)<=balance::value(&customer.balance),EInsufficientBalance);
 
         //check that the person using this function is actually the customer
         assert!(customer.customer_address == tx_context::sender(ctx), ENotOwner);
 
         //check that customer is not admin
-        assert!(customer.customer_address == admin.owner_address, EDeniedAccess);
-
+        assert!(customer.customer_address != admin.owner_address, EDeniedAccess);
 
         let amount__value = balance::value(&amount);
         let withdraw_coin = coin::from_balance(amount, ctx);
@@ -132,8 +128,6 @@ module defipay::defipay{
 
         balance::join(&mut customer.balance, remaining);
         balance::join(&mut admin.balance, remaining_admin);           
-           
-
     }
 
     // transfer function
@@ -155,7 +149,6 @@ module defipay::defipay{
         public_transfer(_amount, recipient_address);
 
         balance::join(&mut sender.balance, remaining_temp);
-
     }
 
     //flag function (admin)
