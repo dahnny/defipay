@@ -114,7 +114,7 @@ module defipay::defipay{
         ctx: &mut TxContext
     ){
         //check if customer balance is greater or equal to amount being withdrawn
-        assert!(balance::value(&amount)>balance::value(&customer.balance),EInsufficientBalance);
+        assert!(balance::value(&amount) <= balance::value(&customer.balance),EInsufficientBalance);
 
         //check that the person using this function is actually the customer
         assert!(customer.customer_address == tx_context::sender(ctx), ENotOwner);
