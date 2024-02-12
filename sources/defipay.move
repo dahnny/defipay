@@ -91,6 +91,9 @@ module defipay::defipay{
     {
         //check that the person using this function is actually the customer
         assert!(customer.customer_address == tx_context::sender(ctx), ENotOwner);
+        
+        //check amount is not less than required
+        assert!(coin::value(amount) >= FLOAT_SCALING*3, EInsufficientBalance);
 
         // let amount_balance = coin::into_balance(amount);
         let amount_balance_mut = coin::balance_mut(amount);
@@ -120,7 +123,8 @@ module defipay::defipay{
         assert!(customer.customer_address == tx_context::sender(ctx), ENotOwner);
 
         //check that customer is not admin
-        assert!(customer.customer_address == admin.owner_address, EDeniedAccess);
+        assert!(customer.customer_address != admin.owner_address, EDeniedAccess);
+
 
 
         let amount__value = balance::value(&amount);
@@ -146,6 +150,9 @@ module defipay::defipay{
         //check that it is the customer that has access to this function
         assert!(sender.customer_address == tx_context::sender(ctx), ENotOwner);
         //everyone has access to this function
+
+        //check if the sender has enough balance to transfer
+        assert!(coin::value(amount) >= FLOAT_SCALING*2, EInsufficientBalance);
 
         let amount_balance = coin::balance_mut(amount);
         let remaining_temp = balance::split(amount_balance, FLOAT_SCALING);
